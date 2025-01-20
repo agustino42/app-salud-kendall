@@ -4,9 +4,19 @@ import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { InitialData } from "./InitialDataForm";
 
+interface DailyData {
+  date: string;
+  weight: number;
+  sleepHours: number;
+  stressLevel: number;
+  waterIntake: number;
+  exerciseMinutes: number;
+  moodRating: number;
+}
+
 interface HealthAnalysisProps {
   initialData: InitialData;
-  dailyData: any[];
+  dailyData: DailyData[];
   correlation: number | null;
 }
 
@@ -52,8 +62,8 @@ const getDietRecommendation = (weightStatus: string) => {
   return diets[weightStatus as keyof typeof diets];
 };
 
-const getHealthScore = (data: any) => {
-  let score = {
+const getHealthScore = (data: DailyData) => {
+  const score = {
     sueño: (data.sleepHours >= 7 && data.sleepHours <= 9) ? 100 : (data.sleepHours * 100) / 8,
     agua: (data.waterIntake * 100) / 8,
     ejercicio: (data.exerciseMinutes * 100) / 30,
@@ -203,7 +213,11 @@ const HealthAnalysis: React.FC<HealthAnalysisProps> = ({
   const lastEntry = dailyData[dailyData.length - 1];
   const weightStatus = getWeightStatus(lastEntry.weight);
   const dietPlan = getDietRecommendation(weightStatus);
-  const nutritionalPlan = getNutritionalPlan(lastEntry.weight, lastEntry.waterIntake, lastEntry.exerciseMinutes);
+  const nutritionalPlan = getNutritionalPlan(
+    lastEntry.weight, 
+    lastEntry.waterIntake, 
+    lastEntry.exerciseMinutes
+  );
   const healthScores = getHealthScore(lastEntry);
   
   const [emblaRef] = useEmblaCarousel({
@@ -250,6 +264,8 @@ const HealthAnalysis: React.FC<HealthAnalysisProps> = ({
       tag: "�� Hidratación"
     }
   ];
+
+  const showInitialComparison = lastEntry.weight !== initialData.initialWeight;
 
   return (
     <div className="space-y-6">
@@ -652,6 +668,30 @@ const HealthAnalysis: React.FC<HealthAnalysisProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {showInitialComparison && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Comparación con Datos Iniciales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>
+              Tu peso inicial era: {initialData.initialWeight}kg
+              {lastEntry.weight > initialData.initialWeight 
+                ? ` Has aumentado ${(lastEntry.weight - initialData.initialWeight).toFixed(1)}kg`
+                : ` Has perdido ${(initialData.initialWeight - lastEntry.weight).toFixed(1)}kg`
+              }
+            </p>
+            <p>
+              Tu meta de sueño es: {initialData.sleepGoal} horas
+              {lastEntry.sleepHours >= initialData.sleepGoal 
+                ? " ¡Estás cumpliendo tu meta! 🎉"
+                : " Aún no alcanzas tu meta de sueño"
+              }
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
