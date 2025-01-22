@@ -106,9 +106,9 @@ El sistema genera recomendaciones nutricionales basadas en:
 
 ## 🚀 Cómo Empezar
 
-1. Clona el repositorio:
-2. Instala las dependencias:
-3. Inicia el servidor de desarrollo:
+
+ Instala las dependencias:
+ Inicia el servidor de desarrollo:
 
 ## componentes principales
 
